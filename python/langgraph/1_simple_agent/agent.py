@@ -5,20 +5,17 @@ import uuid
 from typing import Annotated, Dict, List
 
 from api.base_agent import BaseAgent
-from api.base_message import BaseMessage, BaseMessageType
+from api.base_message import BaseMessage
+from common.utils import LangGraphUtils
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage as LangchainBaseMessage, AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.tools import BaseTool
-from langchain_openai import ChatOpenAI
-from langchain_tavily import TavilySearch
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from typing_extensions import TypedDict
-
-from tools import check_supplier_compliance, assess_disruption_risk
 
 
 class AgentState(TypedDict):
@@ -103,7 +100,7 @@ class Agent(BaseAgent):
         """Get current conversation history."""
         current_state = self.graph.get_state(config=self.config)
         messages = [m for m in current_state.values.get("messages", []) if isinstance(m, (HumanMessage, AIMessage))]
-        return [AgentFactory.langchain_to_base_message(message) for message in messages]
+        return [LangGraphUtils.to_base_message(message) for message in messages]
 
     def _invoke_chatbot(self, state: AgentState) -> Dict[str, List]:
         """Internal chatbot node implementation."""
@@ -131,23 +128,3 @@ class Agent(BaseAgent):
             "configurable": {"thread_id": str(uuid.uuid4())[:8]},
             "callbacks": callbacks
         }
-
-
-# TODO: Move to a better place
-class AgentFactory:
-    @staticmethod
-    def create_reference_agent(callbacks: List) -> BaseAgent:
-        return Agent(
-            llm=ChatOpenAI(model="gpt-4"),
-            tools=[TavilySearch(max_results=2), assess_disruption_risk, check_supplier_compliance],
-            callbacks=callbacks
-        )
-
-    @staticmethod
-    def langchain_to_base_message(langchain_message: LangchainBaseMessage) -> BaseMessage:
-        if isinstance(langchain_message, AIMessage):
-            return BaseMessage(message_type=BaseMessageType.AiMessage, content=str(langchain_message.content))
-        elif isinstance(langchain_message, HumanMessage):
-            return BaseMessage(message_type=BaseMessageType.HumanMessage, content=str(langchain_message.content))
-        else:
-            raise NotImplementedError(f"Unexpected message type: {type(langchain_message)}")
