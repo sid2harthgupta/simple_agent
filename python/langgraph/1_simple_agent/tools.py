@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Galileo Technologies, Inc. All rights reserved.
+
 from langchain_core.tools import tool
 import datetime
 

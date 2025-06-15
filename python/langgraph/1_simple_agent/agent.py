@@ -1,18 +1,24 @@
 # Copyright (c) 2025 Galileo Technologies, Inc. All rights reserved.
 
 """LangGraph-based conversational agent with automatic state management."""
+import uuid
+from typing import Annotated, Dict, List
 
-from typing import Annotated, Dict, List, Optional
-
+from api.base_agent import BaseAgent
+from api.base_message import BaseMessage, BaseMessageType
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import BaseMessage as LangchainBaseMessage, AIMessage, HumanMessage
 from langchain_core.tools import BaseTool
+from langchain_openai import ChatOpenAI
+from langchain_tavily import TavilySearch
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
-from langgraph.checkpoint.memory import MemorySaver
 from typing_extensions import TypedDict
+
+from tools import check_supplier_compliance, assess_disruption_risk
 
 
 class AgentState(TypedDict):
@@ -20,7 +26,7 @@ class AgentState(TypedDict):
     messages: Annotated[List, add_messages]
 
 
-class Agent:
+class Agent(BaseAgent):
     """LangGraph wrapper for stateful agents with tool support and conversation memory.
 
     Example:
@@ -31,7 +37,7 @@ class Agent:
         >>> llm = ChatOpenAI(model="gpt-4")
         >>> tools = [TavilySearch(max_results=3)]
         >>> callbacks = [GalileoCallback()]
-        >>> agent = Agent(llm, tools, "thread_1", callbacks)
+        >>> agent = Agent(llm, tools, callbacks)
         >>> response = agent.invoke("What are supply chain risks?")
     """
 
@@ -39,37 +45,41 @@ class Agent:
             self,
             llm: BaseChatModel,
             tools: List[BaseTool],
-            thread_id: str,
-            callbacks: List,
-            history: Optional[List[BaseMessage]] = None
+            callbacks: List
     ) -> None:
         """Initialize agent with LangGraph-managed state.
 
         Args:
             llm: Chat model for generating responses.
             tools: Available tools for the agent.
-            thread_id: Unique conversation thread identifier.
             callbacks: Monitoring/logging callbacks.
-            history: Optional initial message history.
         """
         self.tools = tools
         self.llm_with_tools = llm.bind_tools(tools)
-        self.thread_id = thread_id
-        self.config = {
-            "configurable": {"thread_id": thread_id},
-            "callbacks": callbacks
-        }
+        self.callbacks = callbacks
+        self.config = self._create_config(callbacks)
 
         self.graph = self._build_graph()
 
-        if history:
-            self.graph.invoke({"messages": history}, config=self.config)
+    @property
+    def name(self) -> str:
+        return "Supply Chain Agent"
 
     @property
-    def state(self) -> AgentState:
-        """Current conversation state from LangGraph."""
-        current_state = self.graph.get_state(config=self.config)
-        return AgentState(messages=current_state.values.get("messages", []))
+    def capabilities(self) -> List[str]:
+        return ["Web search", "Tool calling", "Memory"]
+
+    @property
+    def example_queries(self) -> List[str]:
+        return [
+            "Who has won the most men's singles tennis matches?",
+            "What is the compliance status for SUP001?",
+            "What is the square root of 34 multiplied by 5?",
+        ]
+
+    def reset(self) -> None:
+        self.graph = self._build_graph()
+        self.config = self._create_config(self.callbacks)
 
     def invoke(self, user_message: str) -> str:
         """Send message to agent and get response.
@@ -89,9 +99,11 @@ class Agent:
         )
         return result["messages"][-1].content
 
-    def get_conversation_history(self) -> List[BaseMessage]:
+    def get_message_history(self) -> List[BaseMessage]:
         """Get current conversation history."""
-        return self.state["messages"]
+        current_state = self.graph.get_state(config=self.config)
+        messages = [m for m in current_state.values.get("messages", []) if isinstance(m, (HumanMessage, AIMessage))]
+        return [AgentFactory.langchain_to_base_message(message) for message in messages]
 
     def _invoke_chatbot(self, state: AgentState) -> Dict[str, List]:
         """Internal chatbot node implementation."""
@@ -112,3 +124,30 @@ class Agent:
         graph_builder.add_edge(START, "chatbot")
 
         return graph_builder.compile(checkpointer=MemorySaver())
+
+    @staticmethod
+    def _create_config(callbacks: List) -> dict:
+        return {
+            "configurable": {"thread_id": str(uuid.uuid4())[:8]},
+            "callbacks": callbacks
+        }
+
+
+# TODO: Move to a better place
+class AgentFactory:
+    @staticmethod
+    def create_reference_agent(callbacks: List) -> BaseAgent:
+        return Agent(
+            llm=ChatOpenAI(model="gpt-4"),
+            tools=[TavilySearch(max_results=2), assess_disruption_risk, check_supplier_compliance],
+            callbacks=callbacks
+        )
+
+    @staticmethod
+    def langchain_to_base_message(langchain_message: LangchainBaseMessage) -> BaseMessage:
+        if isinstance(langchain_message, AIMessage):
+            return BaseMessage(message_type=BaseMessageType.AiMessage, content=str(langchain_message.content))
+        elif isinstance(langchain_message, HumanMessage):
+            return BaseMessage(message_type=BaseMessageType.HumanMessage, content=str(langchain_message.content))
+        else:
+            raise NotImplementedError(f"Unexpected message type: {type(langchain_message)}")
