@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 
 class BaseMessageType(enum.Enum):
-    """Framework agnostic message types."""
+    """Framework-agnostic message types."""
     AiMessage = 1
     HumanMessage = 2
     SystemMessage = 3
