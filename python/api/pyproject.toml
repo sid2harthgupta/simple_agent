@@ -1,0 +1,17 @@
+[project]
+name = "api"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Siddharth Gupta", email = "sid2harthgupta@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "galileo>=1.3.0",
+    "streamlit>=1.45.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

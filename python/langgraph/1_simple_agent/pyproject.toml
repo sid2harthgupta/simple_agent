@@ -1,19 +1,25 @@
 [project]
-name = "2-tools-and-rag"
+name = "1_simple_agent"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "api",
     "dotenv>=0.9.9",
     "galileo>=1.3.0",
     "langchain-openai>=0.3.23",
     "langchain-tavily>=0.2.2",
     "langgraph>=0.4.8",
-    "streamlit>=1.45.1",
 ]
 
 [dependency-groups]
 dev = [
     "ipython>=9.3.0",
 ]
+
+[tool.setuptools]
+py-modules = ["agent", "tools", "app"]
+
+[tool.uv.sources]
+api = { path = "../../api", editable = true }
