@@ -11,10 +11,9 @@ from tools import assess_disruption_risk, check_supplier_compliance
 from pinecone_retrieval_tool import PineconeRetrievalTool
 
 if __name__ == "__main__":
-    """Loads the environment variables and runs the agent via the Streamlit App."""
     load_dotenv()
     agent = Agent(
-            llm=ChatOpenAI(model="gpt-4"),
+            llm=ChatOpenAI(model="gpt-4", name="Supply Chain Agent"),
             tools=[
                 TavilySearch(max_results=2),
                 assess_disruption_risk,
