@@ -4,7 +4,7 @@ import uuid
 
 import streamlit as st
 from api.base_agent import BaseAgent
-from api.base_message import BaseMessageType
+from api.base_message import BaseMessageType, BaseMessage
 from galileo import galileo_context
 
 
@@ -59,7 +59,9 @@ class GalileoStreamlitApp:
             with st.spinner("Thinking..."):
                 try:
                     # Process the user input through the agent
-                    st.session_state.agent.invoke(user_input)
+                    st.session_state.agent.invoke(
+                        [BaseMessage(message_type=BaseMessageType.HumanMessage, content=user_input)]
+                    )
 
                 except Exception as e:
                     st.error(f"Error: {str(e)}")

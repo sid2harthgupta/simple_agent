@@ -14,6 +14,6 @@ class BaseMessageType(enum.Enum):
 
 @dataclass
 class BaseMessage:
-    """Framework agnostic message data."""
+    """Framework-agnostic message data."""
     message_type: BaseMessageType
     content: str

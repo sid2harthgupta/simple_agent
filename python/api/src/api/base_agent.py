@@ -37,11 +37,11 @@ class BaseAgent(ABC):
         pass
 
     @abstractmethod
-    def invoke(self, user_message: str) -> str:
+    def invoke(self, messages: List[BaseMessage]) -> List[BaseMessage]:
         """Process user message and return agent response.
 
         Args:
-            user_message: User's input message.
+            messages: List of BaseMessage instances used to trigger the agent.
 
         Returns:
             Agent's response as string.

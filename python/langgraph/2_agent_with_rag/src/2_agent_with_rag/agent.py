@@ -1,6 +1,5 @@
 # Copyright (c) 2025 Galileo Technologies, Inc. All rights reserved.
 
-"""LangGraph-based conversational agent with automatic state management."""
 import uuid
 import warnings
 from typing import Annotated, Dict, List
@@ -33,12 +32,13 @@ class Agent(BaseAgent):
         >>> from langchain_openai import ChatOpenAI
         >>> from langchain_tavily import TavilySearch
         >>> from galileo.handlers.langchain import GalileoCallback
+        >>> from api.base_message import BaseMessage, BaseMessageType
         >>>
         >>> llm = ChatOpenAI(model="gpt-4")
         >>> tools = [TavilySearch(max_results=3)]
         >>> callbacks = [GalileoCallback()]
         >>> agent = Agent(llm, tools, callbacks)
-        >>> response = agent.invoke("What are supply chain risks?")
+        >>> response = agent.invoke([BaseMessage(message_type=BaseMessageType.HumanMessage, content="What are supply chain risks?")])
     """
 
     def __init__(
@@ -79,26 +79,15 @@ class Agent(BaseAgent):
         ]
 
     def reset(self) -> None:
-        self.graph = self._build_graph()
         self.config = self._create_config(self.callbacks)
 
-    def invoke(self, user_message: str) -> str:
-        """Send message to agent and get response.
-
-        LangGraph automatically loads conversation history, processes the message
-        through the graph (with tools if needed), and saves the updated state.
-
-        Args:
-            user_message: User's input message.
-
-        Returns:
-            Agent's response as string.
-        """
+    def invoke(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+        assert len(messages) == 1
         result = self.graph.invoke(
-            {"messages": [HumanMessage(content=user_message)]},
+            {"messages": [LangGraphUtils.to_langchain_message(messages[0])]},
             config=self.config
         )
-        return result["messages"][-1].content
+        return [LangGraphUtils.to_base_message(result["messages"][-1])]
 
     def get_message_history(self) -> List[BaseMessage]:
         """Get current conversation history."""
