@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from api.base_message import BaseMessage
+from api.base_state import BaseState
 
 
 class BaseAgent(ABC):
@@ -37,15 +38,7 @@ class BaseAgent(ABC):
         pass
 
     @abstractmethod
-    def invoke(self, messages: List[BaseMessage]) -> List[BaseMessage]:
-        """Process user message and return agent response.
-
-        Args:
-            messages: List of BaseMessage instances used to trigger the agent.
-
-        Returns:
-            Agent's response as string.
-        """
+    def invoke(self, state: BaseState) -> BaseState:
         pass
 
     @abstractmethod

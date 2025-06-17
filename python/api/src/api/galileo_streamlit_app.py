@@ -3,9 +3,11 @@
 import uuid
 
 import streamlit as st
+from galileo import galileo_context
+
 from api.base_agent import BaseAgent
 from api.base_message import BaseMessageType, BaseMessage
-from galileo import galileo_context
+from api.base_state import BaseStateFactory
 
 
 class GalileoStreamlitApp:
@@ -60,7 +62,9 @@ class GalileoStreamlitApp:
                 try:
                     # Process the user input through the agent
                     st.session_state.agent.invoke(
-                        [BaseMessage(message_type=BaseMessageType.HumanMessage, content=user_input)]
+                        BaseStateFactory.from_message(
+                            BaseMessage(message_type=BaseMessageType.HumanMessage, content=user_input)
+                        )
                     )
 
                 except Exception as e:
