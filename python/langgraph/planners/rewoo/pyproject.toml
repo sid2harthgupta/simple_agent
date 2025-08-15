@@ -1,0 +1,28 @@
+[project]
+name = "rewoo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Siddharth Gupta", email = "sid2harthgupta@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "api",
+    "common",
+    "galileo>=1.12.0",
+    "langchain-community>=0.3.27",
+    "langchain-core>=0.3.72",
+    "langchain-openai>=0.3.28",
+    "langchain-tavily>=0.2.11",
+    "langgraph>=0.6.3",
+    "tavily-python>=0.7.10",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+api = { path = "../../../api", editable = true }
+common = { path = "../../common", editable = true }
