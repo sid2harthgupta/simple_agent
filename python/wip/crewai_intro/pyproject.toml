@@ -1,0 +1,17 @@
+[project]
+name = "crewai-intro"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Siddharth Gupta", email = "sid2harthgupta@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "crewai>=0.159.0",
+    "crewai-tools>=0.62.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.11,<0.9.0"]
+build-backend = "uv_build"
