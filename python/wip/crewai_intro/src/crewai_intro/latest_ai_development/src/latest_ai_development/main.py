@@ -5,6 +5,8 @@ import warnings
 from datetime import datetime
 
 from latest_ai_development.crew import LatestAiDevelopment
+from galileo.handlers.crewai.handler import CrewAICallback
+from galileo.logger import GalileoLogger
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -17,6 +19,16 @@ def run():
     """
     Run the crew.
     """
+    # Initialize Galileo logger
+    galileo_logger = GalileoLogger()
+
+    # Create CrewAI callback
+    CrewAICallback(
+        galileo_logger=galileo_logger,
+        start_new_trace=True,
+        flush_on_chain_end=True
+    )
+
     inputs = {
         'topic': 'AI LLMs',
         'current_year': str(datetime.now().year)

@@ -1021,6 +1021,41 @@ wheels = [
 ]
 
 [[package]]
+name = "galileo"
+version = "1.15.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "attrs" },
+    { name = "backoff" },
+    { name = "galileo-core" },
+    { name = "pydantic" },
+    { name = "pyjwt" },
+    { name = "python-dateutil" },
+    { name = "wrapt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b9/38/ac3f68744142d15623cc2e1dae10b5559bf1bf35daeebb41d951e2f90984/galileo-1.15.0.tar.gz", hash = "sha256:183ff09d7a0f538b09361006c5a08603bdcc7f0d2f047955dc103940d03956dc", size = 363322, upload-time = "2025-08-13T18:23:45.929Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/69/eb/d992a6f31c58d8f21ef677f57cc3df4d43ec3cf3018747de225e416395ec/galileo-1.15.0-py3-none-any.whl", hash = "sha256:9d8354b5441ed1c0662213664c9c1550dd7c2ebeb72be9a7b273d28289cd3930", size = 964467, upload-time = "2025-08-13T18:23:43.866Z" },
+]
+
+[[package]]
+name = "galileo-core"
+version = "3.62.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "pyjwt" },
+    { name = "typing-extensions" },
+    { name = "uvloop", marker = "sys_platform != 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/56/e7/4930e5db75cb36cddb62a9faa41b61974f6a7c6f903ca43737ca400f3fad/galileo_core-3.62.0.tar.gz", hash = "sha256:f80b6a735c6688dca1f49c7c93db2e95ce546c46f9afcee096b6ead0d5e5b796", size = 54529, upload-time = "2025-08-08T16:11:57.916Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/08/f0/725d6bf88717aac9865752692f8dae623bc12cfb5f56692fed0ae595500f/galileo_core-3.62.0-py3-none-any.whl", hash = "sha256:c571d4b20cf511d6752d07a209c1bbcdfccdbdee961aa0d894ac27587e93a83f", size = 94300, upload-time = "2025-08-08T16:11:56.113Z" },
+]
+
+[[package]]
 name = "google-auth"
 version = "2.40.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1789,10 +1824,14 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "crewai", extra = ["tools"] },
+    { name = "galileo" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "crewai", extras = ["tools"], specifier = ">=0.159.0,<1.0.0" }]
+requires-dist = [
+    { name = "crewai", extras = ["tools"], specifier = ">=0.159.0,<1.0.0" },
+    { name = "galileo", specifier = ">=1.15.0" },
+]
 
 [[package]]
 name = "litellm"
