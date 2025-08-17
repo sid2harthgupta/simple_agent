@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "crewai>=0.159.0",
     "crewai-tools>=0.62.0",
+    "galileo>=1.15.0",
 ]
 
 [build-system]
