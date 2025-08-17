@@ -25,7 +25,7 @@ class LatestAiDevelopment():
         return Agent(
             config=self.agents_config['researcher'], # type: ignore[index]
             verbose=True,
-            tools=[SerperDevTool],
+            tools=[SerperDevTool()],
         )
 
     @agent
